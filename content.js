@@ -18,7 +18,7 @@ function sendStartMessage(seconds) {
 function sendErrorMessage(errorMessage) {
   chrome.runtime.sendMessage({
     action: "errorBadge",
-    errorMessage: errorMessage
+    errorMessage: errorMessage,
   });
 }
 
@@ -43,24 +43,12 @@ function checkCountdown() {
   sendStartMessage(seconds);
 }
 
-// Function to check countdown timer each time the horn is sounded
-function checkCountdownOnHornSound() {
-  const hornButton = document.querySelector(
-    "[class^='huntersHornView__horn huntersHornView__']"
-  );
-  if (hornButton) {
-    hornButton.addEventListener("click", () => {
-      delayExecution(checkCountdown, 3000);
-    });
-  } else {
-    const errorMessage = "Horn button missing!"
-    sendErrorMessage(errorMessage);
-    console.log(errorMessage);
-  }
-}
-
 // Run on initial page visit
 delayExecution(checkCountdown, 1000);
 
-// Run on horn sound with one second delay to allow page to load before running
-delayExecution(checkCountdownOnHornSound, 1000);
+// Listen for messages from background script
+chrome.runtime.onMessage.addListener(function (message) {
+  if (message === "check horn") {
+    delayExecution(checkCountdown, 3000);
+  }
+});

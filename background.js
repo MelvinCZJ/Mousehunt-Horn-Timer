@@ -28,17 +28,19 @@ function getRemainingSeconds() {
   return remainingSeconds;
 }
 
+// Define a fixed horn notification ID
+const hornNotificationId = "horn_notification_id";
+
 // Function to create horn notification
-function createNotification() {
-  chrome.notifications.create(
-    {
+function createHornNotification() {
+  chrome.notifications.clear(hornNotificationId, function () {
+    chrome.notifications.create(hornNotificationId, {
       type: "basic",
       title: "MouseHunt Horn Is Ready!",
       message: "Click here to go back to Mouse Hunt!",
       iconUrl: "icons/air-horn.png",
-    },
-    function () {}
-  );
+    });
+  });
 }
 
 // Function to create error notification
@@ -68,8 +70,7 @@ function redirectToMouseHunt() {
           if (!tab.active || tab.windowId !== currentWindow.id) {
             chrome.windows.update(tab.windowId, { state: "maximized" });
             chrome.tabs.update(tab.id, { active: true });
-          }
-          else if (tab.state === "minimized") {
+          } else if (tab.state === "minimized") {
             chrome.windows.update(tab.windowId, { state: "maximized" });
           }
         }
@@ -106,7 +107,7 @@ function startCountdown(seconds) {
     if (remainingSeconds <= 0) {
       clearInterval(countdownInterval);
       remainingSeconds = 0;
-      createNotification();
+      createHornNotification();
     }
     if (remainingSeconds > 0) {
       updateBadge(timeInMinutesAndSeconds(remainingSeconds));
@@ -126,4 +127,31 @@ chrome.runtime.onMessage.addListener(function (message) {
     updateBadge("Error");
     createErrorNotification(errorMessage);
   }
+});
+
+// Function to send a check horn message to content script
+function sendCheckHornMessage() {
+  chrome.tabs.query(
+    { url: "https://www.mousehuntgame.com/*" },
+    function (tabs) {
+      var tab = tabs.find(function (tab) {
+        return tab.active;
+      });
+      if (tab) {
+        chrome.tabs.sendMessage(tab.id, "check horn");
+      }
+    }
+  );
+}
+
+// Define a listener function to check for horn sound
+function checkCompletedRequests(details) {
+  if (details.url.includes("activeturn.php")) {
+    sendCheckHornMessage();
+  }
+}
+
+// Add a listener to intercept all web requests from the MouseHunt site
+chrome.webRequest.onCompleted.addListener(checkCompletedRequests, {
+  urls: ["https://www.mousehuntgame.com/*"],
 });
