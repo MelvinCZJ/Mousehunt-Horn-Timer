@@ -1,6 +1,7 @@
 # MouseHunt Horn Timer
 A chrome extension that alerts the user to sound the horn when the horn is ready. (Works on OperaGX as well, have not tested on other web browsers and I do not have any intentions of extending this to other web browsers.)
 **DISCLAIMER**: I have sent a message to HitGrab to check if the behaviour of this extension violates any of their T&Cs but they have yet to respond at this current time, use this at your own risk! This is not a bot and there are no automations for sounding the horn!
+**UPDATE**: HitGrab's reply was that the extension is fine as long as it does not sound the horn!
 
 ## Usage
 Once the extension has been added, visit your mousehunt site, and the extension should start working on its own! 
